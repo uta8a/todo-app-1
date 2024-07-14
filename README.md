@@ -1,6 +1,15 @@
 # todo-app-1
 https://zenn.dev/uta8a/scraps/f94e8c53ae8d6e
 
+setup
+
+```bash
+export PROJECT="Google Cloud Project ID"
+export FUNCTION_TARGET="todoapp"
+export GCLOUD_TOKEN=$(gcloud auth print-identity-token)
+export URL="Cloud Functions URL"
+```
+
 local test
 
 ```bash
