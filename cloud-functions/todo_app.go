@@ -14,11 +14,12 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
+	"gopkg.in/alessio/shellescape.v1"
 )
 
 func convertContent(content string) string {
-	// shell injection可能なコードだが、Cloud Functions側に認証をかけているので目をつぶる
-	cmd := fmt.Sprintf("echo %s | perl validation_content.pl", content)
+	// shell injection対策
+	cmd := fmt.Sprintf("echo %s | perl validation_content.pl", shellescape.Quote(content))
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		log.Fatal(err)
