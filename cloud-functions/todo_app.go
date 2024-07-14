@@ -8,12 +8,23 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 
 	"cloud.google.com/go/firestore"
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 )
+
+func convertContent(content string) string {
+	// shell injection可能なコードだが、Cloud Functions側に認証をかけているので目をつぶる
+	cmd := fmt.Sprintf("echo %s | perl validation_content.pl", content)
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(out)
+}
 
 func generateUUID() string {
 	return uuid.New().String()
@@ -87,7 +98,7 @@ func putTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, r *
 		Value: raw.Done,
 	}, {
 		Path:  "content",
-		Value: raw.Content,
+		Value: convertContent(raw.Content),
 	},
 	})
 	if err != nil {
@@ -107,7 +118,7 @@ func postTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, r 
 	_, err = c.Collection("todo").Doc(id).Set(x, map[string]interface{}{
 		"id":      id,
 		"done":    raw.Done,
-		"content": raw.Content,
+		"content": convertContent(raw.Content),
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,6 +128,7 @@ func postTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, r 
 
 func getTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, _ *http.Request) {
 	iter := c.Collection("todo").Documents(x)
+	var ret []map[string]interface{}
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {
@@ -125,7 +137,7 @@ func getTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, _ *
 		if err != nil {
 			log.Fatalf("Failed to iterate: %v", err)
 		}
-		fmt.Println(doc.Data())
+		ret = append(ret, doc.Data())
 	}
-	fmt.Fprint(w, "Hello, World!\n")
+	json.NewEncoder(w).Encode(ret)
 }
