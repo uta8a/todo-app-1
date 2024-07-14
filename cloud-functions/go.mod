@@ -17,7 +17,7 @@ require (
 	cloud.google.com/go/functions v1.15.3 // indirect
 	cloud.google.com/go/longrunning v0.5.1 // indirect
 	github.com/alessio/shellescape v1.4.2 // indirect
-	github.com/cloudevents/sdk-go/v2 v2.14.0 // indirect
+	github.com/cloudevents/sdk-go/v2 v2.15.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
