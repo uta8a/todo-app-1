@@ -11,15 +11,11 @@ my @tmp = split(//, $in);
 # e.g. おやつは300円まで -> おやつは 300 円まで
 for my $i (0 .. ($#tmp-1)) {
     if (($tmp[$i] =~ /\d/) && ($tmp[$i+1] !~ /\d/)) {
-        print '1: ' . $i . ' ' . $tmp[$i] . ' ' . $tmp[$i+1] . "\n";
         push @out, $tmp[$i] . ' ';
     } elsif ($tmp[$i] !~ /\d/ && $tmp[$i+1] =~ /\d/) {
-        print $i . ' ' . $tmp[$i] . ' ' . $tmp[$i+1] . "\n";
         push @out, $tmp[$i] . ' ';
     } else {
-        print $i . ' ' . $tmp[$i] . "\n";
         push @out, $tmp[$i];
     }
 }
 print join('', @out);
-print "\n";

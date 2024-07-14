@@ -1,4 +1,4 @@
-module todo_app
+module github.com/uta8a/todo-app-1
 
 go 1.22.3
 

@@ -5,7 +5,7 @@ import (
 	"os"
 
 	// Blank-import the function package so the init() runs
-	_ "todo_app"
+	_ "github.com/uta8a/todo-app-1"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/funcframework"
 )

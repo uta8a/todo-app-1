@@ -1,14 +1,16 @@
-// Package helloworld provides a set of Cloud Functions samples.
-package helloworld
+package todoapp
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
+
+	_ "embed"
 
 	"cloud.google.com/go/firestore"
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
@@ -17,14 +19,28 @@ import (
 	"gopkg.in/alessio/shellescape.v1"
 )
 
+//go:embed validation_content.pl
+var files embed.FS
+
 func convertContent(content string) string {
+	file, err := files.ReadFile("validation_content.pl")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = os.WriteFile("validation_content.pl", file, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 	// shell injection対策
 	cmd := fmt.Sprintf("echo %s | perl validation_content.pl", shellescape.Quote(content))
+	fmt.Printf("cmd: %s\n", cmd)
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return string(out)
+	res := string(out)
+	fmt.Printf("res: %s\n", res)
+	return res
 }
 
 func generateUUID() string {
@@ -116,10 +132,12 @@ func postTodos(c *firestore.Client, x context.Context, w http.ResponseWriter, r 
 		return
 	}
 	id := generateUUID()
+	content := convertContent(raw.Content)
+	fmt.Printf("content: %s\n", content)
 	_, err = c.Collection("todo").Doc(id).Set(x, map[string]interface{}{
 		"id":      id,
 		"done":    raw.Done,
-		"content": convertContent(raw.Content),
+		"content": content,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
